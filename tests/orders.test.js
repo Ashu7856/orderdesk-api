@@ -52,3 +52,35 @@ describe('GET /orders', () => {
     expect(times).toEqual(sorted);
   });
 });
+describe('GET /orders pagination with identical createdAt', () => {
+  it('returns every order exactly once across all pages', async () => {
+    await Order.deleteMany({});
+
+    const base = new Date('2026-10-01T09:00:00.000Z').getTime();
+    const docs = [];
+    for (let batch = 0; batch < 20; batch++) {
+      const createdAt = new Date(base + batch * 60 * 60 * 1000);
+      for (let i = 0; i < 50; i++) {
+        const n = batch * 50 + i + 1;
+        docs.push({
+          orderNumber: `BULK-${n}`,
+          customerName: `Customer ${n}`,
+          amount: n,
+          status: 'paid',
+          createdAt,
+        });
+      }
+    }
+    await Order.insertMany(docs);
+
+    const seen = new Set();
+    let totalPages = 1;
+    for (let page = 1; page <= totalPages; page++) {
+      const res = await request(app).get(`/orders?page=${page}&limit=10`);
+      totalPages = res.body.totalPages;
+      res.body.data.forEach((o) => seen.add(o.orderNumber));
+    }
+
+    expect(seen.size).toBe(1000);
+  });
+});

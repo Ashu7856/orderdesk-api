@@ -12,7 +12,7 @@ router.get('/', async (req, res, next) => {
 
     const [data, total] = await Promise.all([
       Order.find()
-        .sort({ createdAt: -1 })
+        .sort({ createdAt: -1 , _id: -1 })
         .skip((page - 1) * limit)
         .limit(limit)
         .lean(),
