@@ -52,3 +52,7 @@ describe('GET /orders', () => {
     expect(times).toEqual(sorted);
   });
 });
+it('bad page', async () => {
+const res = await request(app).get('/orders?page=abc');
+expect(res.status).toBe(400);
+});
