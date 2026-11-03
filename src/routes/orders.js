@@ -8,6 +8,7 @@ const router = express.Router();
 router.get('/', async (req, res, next) => {
   try {
        const page = Number(req.query.page ?? 1);
+       if(!(page>0&&limit>0&&limit<=100))return res.status(400).json({error:'bad'})
     const limit = Number(req.query.limit ?? 10);
        const [data, total] = await Promise.all([
       Order.aggregate([
